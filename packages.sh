@@ -24,7 +24,7 @@ debian_based=0
 
 CheckOs()
 {
-    if [ -x "$(command -v lsb_release)" ]; then
+    if [ -f "/etc/lsb-release" ]; then
         debian_based=1
     fi
     if [ -f "/etc/alpine-release" ]; then

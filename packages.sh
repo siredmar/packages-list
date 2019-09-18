@@ -41,17 +41,21 @@ CleanFile()
 
 Python2Packages()
 {
-    echo -e "\n###############################################" >> $1
-    echo Python2 packages >> $1 
-    pip freeze >> $1 | true
+    if [ -x "$(command -v pip)" ]; then
+        echo -e "\n###############################################" >> $1
+        echo Python2 packages >> $1 
+        pip freeze >> $1 | true
+    fi
 }
 
 Python3Packages()
 {
-    echo -e "\n###############################################" >> $1
-    echo Python3 packages >> $1
-    pip3 freeze >> $1 | true
-}
+    if [ -x "$(command -v pip3)" ]; then
+        echo -e "\n###############################################" >> $1
+        echo Python3 packages >> $1
+        pip3 freeze >> $1 | true
+    fi
+}   
 
 ApkPackages()
 {
@@ -73,23 +77,29 @@ AptPackages()
 
 NpmPackages()
 {
-    echo -e "\n###############################################" >> $1
-    echo NPM packages >> $1
-    npm list -g >> $1 | true
+    if [ -x "$(command -v npm)" ]; then
+        echo -e "\n###############################################" >> $1
+        echo NPM packages >> $1
+        npm list -g >> $1 | true
+    fi
 }
 
 RustPackages()
 {
-    echo -e "\n###############################################" >> $1
-    echo Rust packages >> $1
-    cargo install --list >> $1 | true
+    if [ -x "$(command -v cargo)" ]; then
+        echo -e "\n###############################################" >> $1
+        echo Rust packages >> $1
+        cargo install --list >> $1 | true
+    fi
 }
 
 GolangPackages()
 {
-    echo -e "\n###############################################" >> $1
-    echo Golang packages >> $1
-    cd $GOPATH/src && go list ./... >> $1 | true
+    if [ -x "$(command -v go)" ]; then
+        echo -e "\n###############################################" >> $1
+        echo Golang packages >> $1
+        cd $GOPATH/src && go list ./... >> $1 | true
+    fi
 }
 
 outputfile="./packages"

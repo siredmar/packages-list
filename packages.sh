@@ -12,6 +12,8 @@ helpFunction()
    echo -e "\t-r |--rust Package list for rust"
    echo -e "\t-g |--golang Package list for golang"
    echo -e "\t-o |--output Output file, default: ./packages"
+   echo -e "\t-p |--product Product string to contain to the report, default: none"
+   echo -e "\t-v |--version Version string to contain to the report, default: none"
    echo -e "If none is set, all will be used by default."
    exit 1 # Exit script after printing help
 }
@@ -66,6 +68,8 @@ GolangPackages()
 }
 
 outputfile="./packages"
+version="none"
+product="none"
 parameterPython2=0
 parameterPython3=0
 parameterApt=0
@@ -116,6 +120,16 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -v|--version)
+    version="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--product)
+    product="$2"
+    shift # past argument
+    shift # past value
+    ;;
     *)    # unknown option
     echo Unknown argument: $key
     helpFunction
@@ -124,6 +138,8 @@ esac
 done
 
 CleanFile
+
+echo "Packages list for '$product' version: $version" >> $outputfile
 
 if [ "$parameterPython2" -eq 1 ]; then
    Python2Packages $outputfile

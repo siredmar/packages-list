@@ -5,16 +5,17 @@ helpFunction()
    echo ""
    echo "Usage: $0 <type>> "
    echo "Possible types are:"
-   echo -e "\t-a |--all Package list for apt"
-   echo -e "\t-s |--system Package list for native system repositories like apt or apk"
-   echo -e "\t-p2|--python2 Package list for python2"
-   echo -e "\t-p3|--python3 Package list for python3"
-   echo -e "\t-n |--npm Package list for npm"
-   echo -e "\t-r |--rust Package list for rust"
-   echo -e "\t-g |--golang Package list for golang"
-   echo -e "\t-o |--output Output file, default: ./packages"
-   echo -e "\t-p |--product Product string to contain to the report, default: none"
-   echo -e "\t-v |--version Version string to contain to the report, default: none"
+   echo -e "  -a |--all Use all"
+   echo -e "  -s |--system Package list for native system repositories like apt or apk"
+   echo -e "  -p2|--python2 Package list for python2"
+   echo -e "  -p3|--python3 Package list for python3"
+   echo -e "  -n |--npm Package list for npm"
+   echo -e "  -r |--rust Package list for rust"
+   echo -e "  -g |--golang Package list for golang"
+   echo -e "  -c |--custom Custom installed packages, uses env variable CUSTOM.\n\t       You must manually set this env variable e.g. \n\t       "export CUSTOM="\$CUSTOM\\\ncomponent=1.0.0"
+   echo -e "  -o |--output Output file, default: ./packages"
+   echo -e "  -p |--product Product string to contain to the report, default: none"
+   echo -e "  -v |--version Version string to contain to the report, default: none"
    echo -e "If none is set, none will be used by default."
    exit 1 # Exit script after printing help
 }
@@ -102,6 +103,13 @@ GolangPackages()
     fi
 }
 
+CustomPackages()
+{
+    echo -e "\n###############################################" >> $1
+    echo Custom packages >> $1
+    echo $CUSTOM >> $1
+}
+
 outputfile="./packages"
 version="none"
 product="none"
@@ -112,6 +120,7 @@ parameterApk=0
 parameterNpm=0
 parameterRust=0
 parameterGolang=0
+parameterCustom=0
 
 while [[ $# -gt 0 ]]
 do
@@ -134,6 +143,7 @@ case $key in
     parameterNpm=1
     parameterRust=1
     parameterGolang=1
+    parameterCustom=1
     shift # past argument
     ;;
     -s|--system)
@@ -151,6 +161,10 @@ case $key in
     ;;
     -g|--golang)
     parameterGolang=1
+    shift # past argument
+    ;;
+    -c|--custom)
+    parameterCustom=1
     shift # past argument
     ;;
     -o|--output)
@@ -206,4 +220,8 @@ fi
 
 if [ "$parameterGolang" -eq "1" ]; then
    GolangPackages $outputfile
+fi
+
+if [ "$parameterCustom" -eq "1" ]; then
+   CustomPackages $outputfile
 fi

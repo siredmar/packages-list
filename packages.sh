@@ -5,17 +5,31 @@ helpFunction()
    echo ""
    echo "Usage: $0 <type>> "
    echo "Possible types are:"
+   echo -e "\t-a |--all Package list for apt"
+   echo -e "\t-s |--system Package list for native system repositories like apt or apk"
    echo -e "\t-p2|--python2 Package list for python2"
    echo -e "\t-p3|--python3 Package list for python3"
-   echo -e "\t-a |--apt Package list for apt"
    echo -e "\t-n |--npm Package list for npm"
    echo -e "\t-r |--rust Package list for rust"
    echo -e "\t-g |--golang Package list for golang"
    echo -e "\t-o |--output Output file, default: ./packages"
    echo -e "\t-p |--product Product string to contain to the report, default: none"
    echo -e "\t-v |--version Version string to contain to the report, default: none"
-   echo -e "If none is set, all will be used by default."
+   echo -e "If none is set, none will be used by default."
    exit 1 # Exit script after printing help
+}
+
+alpine=0
+debian_based=0
+
+CheckOs()
+{
+    if [ -x "$(command -v lsb_release)" ]; then
+        debian_based=1
+    fi
+    if [ -f "/etc/alpine-release" ]; then
+        alpine=1
+    fi
 }
 
 CleanFile()
@@ -39,11 +53,22 @@ Python3Packages()
     pip3 freeze >> $1 | true
 }
 
+ApkPackages()
+{
+    if [ "$alpine" -eq 1 ]; then
+        echo -e  "\n###############################################" >> $1
+        echo Apk packages >> $1
+        apk info -vv | sort >> $1 | true
+    fi
+}
+
 AptPackages()
 {
-    echo -e  "\n###############################################" >> $1
-    echo Apt packages >> $1
-    dpkg-query --showformat='${Package}==${Version}\n' --show >> $1 | true
+    if [ "$debian_based" -eq 1 ]; then
+        echo -e  "\n###############################################" >> $1
+        echo Apt packages >> $1
+        dpkg-query --showformat='${Package}==${Version}\n' --show >> $1 | true
+    fi
 }
 
 NpmPackages()
@@ -73,18 +98,10 @@ product="none"
 parameterPython2=0
 parameterPython3=0
 parameterApt=0
+parameterApk=0
 parameterNpm=0
 parameterRust=0
 parameterGolang=0
-
-if  [[ $# -eq 0 ]]; then
-    parameterPython2=1
-    parameterPython3=1
-    parameterApt=1
-    parameterNpm=1
-    parameterRust=1
-    parameterGolang=1
-fi
 
 while [[ $# -gt 0 ]]
 do
@@ -99,8 +116,19 @@ case $key in
     parameterPython3=1
     shift # past argument
     ;;
-    -a|--apt)
+    -a|--all)
+    parameterPython2=1
+    parameterPython3=1
     parameterApt=1
+    parameterApk=1
+    parameterNpm=1
+    parameterRust=1
+    parameterGolang=1
+    shift # past argument
+    ;;
+    -s|--system)
+    parameterApt=1
+    parameterApk=1
     shift # past argument
     ;;
     -n|--npm)
@@ -137,6 +165,7 @@ case $key in
 esac
 done
 
+CheckOs
 CleanFile
 
 echo "Packages list for '$product' version: $version" >> $outputfile
@@ -151,6 +180,10 @@ fi
 
 if [ "$parameterApt" -eq "1" ]; then
    AptPackages $outputfile
+fi
+
+if [ "$parameterApk" -eq "1" ]; then
+   ApkPackages $outputfile
 fi
 
 if [ "$parameterNpm" -eq "1" ]; then
